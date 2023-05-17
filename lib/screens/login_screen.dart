@@ -5,7 +5,6 @@ import 'package:cookie_buy_cookies/screens/initial_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_button/sign_button.dart';
 
 GoogleSignIn _googleSignIn = GoogleSignIn(

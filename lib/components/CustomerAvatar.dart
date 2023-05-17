@@ -4,7 +4,7 @@ class CustomerAvatar extends StatelessWidget {
   final image;
   final name;
 
-  const CustomerAvatar({Key? key, this.image = null, this.name})
+  const CustomerAvatar({Key? key, this.image, this.name})
       : super(key: key);
 
   @override

@@ -7,6 +7,17 @@ import 'package:flutter/material.dart';
 import '../components/CookieChip.dart';
 import '../helpers/alerts.dart';
 import '../helpers/dioUtil.dart';
+import 'package:pay/pay.dart';
+import 'payment_configurations.dart' as payment_configurations;
+
+const _paymentItems = [
+  PaymentItem(
+    label: 'Total',
+    amount: '99.99',
+    status: PaymentItemStatus.final_price,
+  )
+];
+
 
 class StoreScreen extends StatefulWidget {
   final fromProfile;
@@ -24,6 +35,7 @@ class _StoreScreenState extends State<StoreScreen> {
   Set<String> skuIds = {'30', '90', '120', '150', '330', '660', '1320', '3300'};
   bool isLoading = false;
   double balance = 0.0;
+  late final Pay _payClient;
 
   // Future<void> getProducts() async {
   //   ProductDetailsResponse response =
@@ -132,18 +144,35 @@ class _StoreScreenState extends State<StoreScreen> {
     //     });
     //   }
     // });
+
+    super.initState();
+    _payClient = Pay({
+      PayProvider.google_pay: PaymentConfiguration.fromJsonString(
+          payment_configurations.basicGooglePayIsReadyToPay),
+    });
     getBalance().then((value) {
       setState(() {
         balance = value;
       });
     });
-    super.initState();
+
   }
 
   @override
   void dispose() {
     _subscription.cancel();
     super.dispose();
+  }
+
+
+
+  void onGooglePayPressed() async {
+    final result = await _payClient.showPaymentSelector(
+      PayProvider.google_pay,
+      _paymentItems,
+    );
+
+    print(result);
   }
 
   @override
@@ -197,12 +226,33 @@ class _StoreScreenState extends State<StoreScreen> {
                                 .map((package) => CookieChip(package: package))
                                 .toList(),
                           ),
+
+
+                        FutureBuilder<bool>(
+                          future: _payClient.userCanPay(PayProvider.google_pay),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.done) {
+                              if (snapshot.data == true) {
+                                return RawGooglePayButton(
+                                    type: GooglePayButtonType.pay,
+                                    onPressed: onGooglePayPressed,);
+                              } else {
+                                return Text('Google Pay not available');
+                              }
+                            } else {
+                              CircularProgressIndicator();
+                            }
+                            return CircularProgressIndicator();
+                          },
+                        ),
+
                         ],
                       )),
                     ],
                   ),
                 ),
               ),
+
             ),
           );
   }
